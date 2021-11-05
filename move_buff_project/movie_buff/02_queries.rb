@@ -4,7 +4,7 @@ def eighties_b_movies
   # Show the id, title, year, and score.
   Movie
     .select(:id, :title, :yr, :score)
-    .where("score IN (?) AND yr IN (?)", (3..5), (1980..1989))
+    .where("score BETWEEN ? AND ? AND yr IN (?)", 3, 5, (1980..1989))
 end
 
 def bad_years
@@ -13,11 +13,17 @@ def bad_years
     .select(:yr)
     .where("yr NOT IN (SELECT DISTINCT yr FROM movies WHERE score > 8)")
     .group(:yr)
+    .pluck(:yr)
 end
 
 def cast_list(title)
   # List all the actors for a particular movie, given the title.
   # Sort the results by starring order (ord). Show the actor id and name.
+  Actor 
+    .select(:id, :name)
+    .joins(:movies)
+    .where('title = ?', title)
+    .order('ord ASC')
 
 end
 
@@ -27,7 +33,10 @@ def vanity_projects
   # Show the movie id and title and director's name.
 
   # Note: Directors appear in the 'actors' table.
-
+   Movie
+    .select(:id, :title, :name)
+    .joins(:actors)
+    .where('ord = 1 AND actor_id = director_id')
 end
 
 def most_supportive
